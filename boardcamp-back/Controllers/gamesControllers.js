@@ -3,8 +3,6 @@ import db from '../database.js'
 export async function POSTgames(req, res) {
 	const { name, image, stockTotal, categoryId, pricePerDay } = req.body
 	try {
-		//COLOCAR ESSA PORRA EM UM MIDDLEWARE PQ TA FEIO!
-		// VERIFICAÇÃO POR JOI A IMPLEMENTAR
 		if (!name || stockTotal <= 0 || pricePerDay <= 0) {
 			return res.sendStatus(400)
 		}
@@ -38,10 +36,20 @@ export async function POSTgames(req, res) {
 }
 
 export async function GETgames(req, res) {
-	try {
-		const query = `SELECT games.*, categories.name as categoryName FROM games JOIN categories ON games."categoryId" = categories.id`
+	const { name } = req.query
 
-		const listGames = await db.query(query)
+	try {
+		let listGames = {}
+		if (name) {
+			const query = `SELECT games.*,categories.name as categoryName FROM games JOIN categories ON games."categoryId" = categories.id WHERE games.name LIKE $1`
+			listGames = await db.query(query, [`${name}%`])
+		} else {
+			const query = `SELECT games.*, categories.name as categoryName FROM games JOIN categories ON games."categoryId" = categories.id`
+			listGames = await db.query(query)
+		}
 		res.send(listGames.rows)
-	} catch (error) {}
+	} catch (error) {
+		console.log(error)
+		res.status(400).send(error)
+	}
 }
