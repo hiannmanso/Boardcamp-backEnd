@@ -26,6 +26,7 @@ export async function GETcategories(req, res) {
 		const query = `SELECT * FROM categories`
 		const categories = await db.query(query)
 		res.status(200).send(categories.rows)
-	} catch (error) {}
-	res.status(400).send(error)
+	} catch (error) {
+		res.status(400).send(error)
+	}
 }
